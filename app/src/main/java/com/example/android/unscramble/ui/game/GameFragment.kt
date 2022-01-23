@@ -82,7 +82,7 @@ class GameFragment : Fragment() {
             if (viewModel.nextWord()) {
                 updateNextWordOnScreen()
             } else {
-                showFinalScreenDialogue()
+                showFinalScoreDialogue()
             }
         } else {
             setErrorTextField(true)
@@ -94,7 +94,12 @@ class GameFragment : Fragment() {
      * Increases the word count.
      */
     private fun onSkipWord() {
-
+        if (viewModel.nextWord()) {
+            setErrorTextField(false)
+            updateNextWordOnScreen()
+        } else {
+            showFinalScoreDialogue()
+        }
     }
 
     /*
@@ -142,7 +147,7 @@ class GameFragment : Fragment() {
         binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
     }
 
-    private fun showFinalScreenDialogue(){
+    private fun showFinalScoreDialogue(){
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.congratulations))
             .setMessage(getString(R.string.you_scored, viewModel.score))
