@@ -61,10 +61,15 @@ class GameFragment : Fragment() {
         binding.submit.setOnClickListener { onSubmitWord() }
         binding.skip.setOnClickListener { onSkipWord() }
         // Update the UI
-        updateNextWordOnScreen()
-        binding.score.text = getString(R.string.score, 0)
-        binding.wordCount.text = getString(
-                R.string.word_count, 0, MAX_NO_OF_WORDS)
+        viewModel.score.observe(viewLifecycleOwner, {newScore ->
+            binding.score.text = getString(R.string.score, newScore)
+        })
+        viewModel.currentWordCount.observe(viewLifecycleOwner, { newWordCount ->
+                binding.wordCount.text = getString(R.string.word_count, newWordCount, MAX_NO_OF_WORDS)
+            })
+        viewModel.currentScrambledWord.observe(viewLifecycleOwner, { newWord ->
+            binding.textViewUnscrambledWord.text = newWord
+        })
     }
 
     override fun onDetach() {
@@ -81,9 +86,7 @@ class GameFragment : Fragment() {
 
         if (viewModel.isUserWordCorrect(playerWord)) {
             setErrorTextField(false)
-            if (viewModel.nextWord()) {
-                updateNextWordOnScreen()
-            } else {
+            if (!viewModel.nextWord()) {
                 showFinalScoreDialogue()
             }
         } else {
@@ -98,7 +101,6 @@ class GameFragment : Fragment() {
     private fun onSkipWord() {
         if (viewModel.nextWord()) {
             setErrorTextField(false)
-            updateNextWordOnScreen()
         } else {
             showFinalScoreDialogue()
         }
@@ -120,7 +122,6 @@ class GameFragment : Fragment() {
     private fun restartGame() {
         viewModel.reinitializeData()
         setErrorTextField(false)
-        updateNextWordOnScreen()
     }
 
     /*
@@ -146,14 +147,12 @@ class GameFragment : Fragment() {
     /*
      * Displays the next scrambled word on screen.
      */
-    private fun updateNextWordOnScreen() {
-        binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
-    }
+
 
     private fun showFinalScoreDialogue(){
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.congratulations))
-            .setMessage(getString(R.string.you_scored, viewModel.score))
+            .setMessage(getString(R.string.you_scored, viewModel.score.value))
             .setCancelable(false)
             .setNegativeButton(getString(R.string.exit)) {_, _ ->
                 exitGame()
