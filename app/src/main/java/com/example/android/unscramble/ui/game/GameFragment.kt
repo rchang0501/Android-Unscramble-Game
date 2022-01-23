@@ -75,10 +75,17 @@ class GameFragment : Fragment() {
     * Displays the next scrambled word.
     */
     private fun onSubmitWord() {
-        if (viewModel.nextWord()){
-            updateNextWordOnScreen()
+        val playerWord = binding.textInputEditText.text.toString()
+
+        if (viewModel.isUserWordCorrect(playerWord)) {
+            setErrorTextField(false)
+            if (viewModel.nextWord()) {
+                updateNextWordOnScreen()
+            } else {
+                showFinalScreenDialogue()
+            }
         } else {
-            showFinalScoreDialogue()
+            setErrorTextField(true)
         }
     }
 
@@ -135,7 +142,7 @@ class GameFragment : Fragment() {
         binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
     }
 
-    private fun showFinalScoreDialogue(){
+    private fun showFinalScreenDialogue(){
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.congratulations))
             .setMessage(getString(R.string.you_scored, viewModel.score))
